@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 //bring routes
 
 const blogRoutes = require("./routes/blog");
+const authRoutes = require("./routes/auth");
 
 //to be able to acces dotenv file
 require("dotenv").config();
@@ -19,10 +20,9 @@ const app = express();
 //db
 
 mongoose
-  .connect(process.env.DATABASE, {
+  .connect(process.env.DATABASE_CLOUD, {
     useNewUrlParser: true,
-    useCreateIndex: true,
-    userFindAndModify: false,
+    useUnifiedTopology: true,
   })
   .then(() => console.log("DB connected"));
 
@@ -35,6 +35,7 @@ app.unsubscribe(cookieParser());
 //routes middleware
 
 app.use("/api", blogRoutes);
+app.use("/api", authRoutes);
 
 //cors
 if (process.env.NODE_ENV == "developmnet") {
