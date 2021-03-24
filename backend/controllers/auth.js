@@ -3,31 +3,38 @@ const shortId = require("shortid");
 const jwt = require("jsonwebtoken");
 const expressJwt = require("express-jwt");
 
+require("dotenv").config();
+
 exports.signup = (req, res) => {
+  // console.log(req.body);
   User.findOne({ email: req.body.email }).exec((err, user) => {
     if (user) {
       return res.status(400).json({
-        err: "Email is taken",
+        error: "Email is taken",
       });
     }
 
     const { name, email, password } = req.body;
     let username = shortId.generate();
-    let profile = `${process.env.CLIENT_URL}/profile/${username}}`;
+    let profile = `${process.env.CLIENT_URL}/profile/${username}`;
 
     let newUser = new User({ name, email, password, profile, username });
     newUser.save((err, success) => {
       if (err) {
         return res.status(400).json({
-          err: err,
+          error: err,
         });
       }
+      // res.json({
+      //     user: success
+      // });
       res.json({
-        message: "Signup Success Please signin",
+        message: "Signup success! Please signin.",
       });
     });
   });
 };
+
 exports.signin = (req, res) => {
   const { email, password } = req.body;
   // check if user exist
@@ -56,3 +63,21 @@ exports.signin = (req, res) => {
     });
   });
 };
+
+exports.signout = (req, res) => {
+  res.clearCookie("token");
+  res.json({
+    message: "Signout Success",
+  });
+};
+
+exports.requireSignin = expressJwt({
+  secret: process.env.JWT_SECRET,
+  algorithms: ["HS256"], // added later
+  userProperty: "auth",
+});
+
+// exports.read = (req, res) => {
+//   req.profile.hashed_password = undefined;
+//   return res.json(req.profile);
+// };
